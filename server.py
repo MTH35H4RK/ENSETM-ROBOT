@@ -2,8 +2,11 @@ from flask import Flask, request
 import random
 import requests
 
+# Define a global variable
+traffic_response = ''
+
 # Load configuration from a file or environment variables
-IP_ADDRESS = '192.168.X.X'
+IP_ADDRESS = '192.168.0.100'
 
 app = Flask(__name__)
 
@@ -30,17 +33,17 @@ def accident(param):
 # Endpoint to handle hospitals
 @app.route('/HOSPITAL/<param>')
 def hospital(param):
+    global traffic_response
     if param == 'XXXXX':
         # Do some processing to get H1 or H2, and set the result to the `response` variable
         response = random.choice(['H1', 'H2'])
         # If the response is H1, set the traffic light to V11 or V12
         if response == 'H1':
             traffic_response = random.choice(['V11', 'V12'])
-            send_to_arduino('TRAFFIC', traffic_response)
         # If the response is H2, set the traffic light to V21 or V22
         else:
             traffic_response = random.choice(['V21', 'V22'])
-            send_to_arduino('TRAFFIC', traffic_response)
+         
         # Send the response to the Arduino
         send_to_arduino('HOSPITAL', response)
         # Return the response
@@ -49,30 +52,31 @@ def hospital(param):
         # Return a failed response
         return 'FAILED'
 
+
+
 # Endpoint to handle traffic lights
 @app.route('/LIGHT/<param>')
 def light(param):
     if param == 'XXXXX':
         # Do some processing to get RED or GREEN, and set the result to the `response` variable
         response = random.choice(['RED', 'GREEN'])
-        if response == 'GREEN':
-            # Send a GET request to /GREEN endpoint to change light to green
-            green_response = requests.get(f'http://{IP_ADDRESS}:5000/GREEN/XXXXX')
-            if green_response.status_code == 200 and green_response.text == 'CHANGED':
-                # If the response is successful, set the traffic light to V11 or V12
-                traffic_response = random.choice(['V11', 'V12'])
-                send_to_arduino('TRAFFIC', traffic_response)
-                # Return the original response
-                return response
-            else:
-                # If the response is unsuccessful, return a failed response
-                return 'FAILED'
-        else:
-            # If the light is already red, set the traffic light to V21 or V22
-            traffic_response = random.choice(['V21', 'V22'])
-            send_to_arduino('TRAFFIC', traffic_response)
-            # Return the response
-            return response
+        return response
+        
+        
+    else:
+        # Return a failed response
+        return 'FAILED'
+
+# Endpoint to handle traffic control
+@app.route('/TRAFFIC/<param>')
+def traffic(param):
+    if param == 'XXXXX':
+        # GET empty traffic
+        response = traffic_response
+        # Send the traffic light control signal to the Arduino
+        send_to_arduino('TRAFFIC', response)
+        # Return the response
+        return response
     else:
         # Return a failed response
         return 'FAILED'
@@ -106,4 +110,4 @@ def green(param):
         return 'FAILED'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
