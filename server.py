@@ -14,6 +14,7 @@ app = Flask(__name__)
 @app.route('/CHECK/<param>')
 def check(param):
     # Return a success response
+    print('SUCCESS')
     return 'SUCCESS'
 
 # Endpoint to handle accidents
@@ -23,7 +24,8 @@ def accident(param):
         # Do some processing to get A1 or A2, and set the result to the `response` variable
         response = random.choice(['A1', 'A2'])
         # Send the response to the Arduino
-        send_to_arduino('ACCIDENT', response)
+        #send_to_arduino('ACCIDENT', response)
+        print(response)
         # Return the response
         return response
     else:
@@ -45,14 +47,13 @@ def hospital(param):
             traffic_response = random.choice(['V21', 'V22'])
          
         # Send the response to the Arduino
-        send_to_arduino('HOSPITAL', response)
+        #send_to_arduino('HOSPITAL', response)
+        print(response)
         # Return the response
         return response
     else:
         # Return a failed response
         return 'FAILED'
-
-
 
 # Endpoint to handle traffic lights
 @app.route('/LIGHT/<param>')
@@ -60,9 +61,8 @@ def light(param):
     if param == 'XXXXX':
         # Do some processing to get RED or GREEN, and set the result to the `response` variable
         response = random.choice(['RED', 'GREEN'])
+        print(response)
         return response
-        
-        
     else:
         # Return a failed response
         return 'FAILED'
@@ -74,28 +74,13 @@ def traffic(param):
         # GET empty traffic
         response = traffic_response
         # Send the traffic light control signal to the Arduino
-        send_to_arduino('TRAFFIC', response)
+        #send_to_arduino('TRAFFIC', response)
+        print(response)
         # Return the response
         return response
     else:
         # Return a failed response
         return 'FAILED'
-
-# Function to send data to the Arduino
-def send_to_arduino(endpoint, data):
-    # Use try-except block to catch network errors
-    try:
-        # Send a POST request to the Arduino endpoint with the data
-        response = requests.post(f'http://{IP_ADDRESS}:8080/{endpoint}', json={'data': data})
-        # Check if the response is successful
-        if response.status_code == 200 and response.text == 'OK':
-            return True
-        else:
-            return False
-    except requests.exceptions.RequestException as e:
-        # Handle network errors by logging the error message
-        print(f'Error sending data to Arduino: {e}')
-        return False
 
 # Endpoint to handle changing the traffic light to green
 @app.route('/GREEN/<param>')
@@ -103,6 +88,7 @@ def green(param):
     if param == 'XXXXX':
         # Do some processing to change the light to green, and set the result to the response variable
         response = 'CHANGED'
+        print(response)
         # Return the response
         return response
     else:
