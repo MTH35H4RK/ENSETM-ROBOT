@@ -1,6 +1,7 @@
 int LDR_Pin = A0;
 int m = 0;
 int LED = 0;
+String response = "";
 // Motor pins
 const int MOTOR_A_ENA = 10; // this is right motor
 const int MOTOR_A_IN1 = 9;
@@ -19,9 +20,37 @@ int sensorPin5 = A5;
 // Define the threshold values for the sensors
 int threshold = 500;
 
-
-
+String getResponse() {
+  String response = "";
+  while (Serial.available() > 0) {
+    response += char(Serial.read());
+  }
+  response.trim();
+  return response;
+}
+String getr() {
+  while (response != "A1_H1_V11" && response != "A1_H1_V12" && response != "A2_H1_V11" && response != "A2_H1_V12" && response != "A2_H2_V21" && response !=  "A2_H2_V22" && response != "A1_H2_V21" && response != "A1_H2_V22") {
+    response = getResponse();
+        delay(400);
+        Serial.print("getting the response:");
+        Serial.print(response);
+        Serial.println(",");
+  }
+  return response;
+}
 void setup() {
+
+  // initialize serial:
+  Serial.begin(115200);
+  while (!Serial);
+
+  delay(1000);                    // Wait for the ESP to start
+
+  Serial.println("");
+  Serial.println("Arduino started");
+
+  response = getr();
+
   // Set the motor pins as output
   pinMode(MOTOR_A_ENA, OUTPUT);
   pinMode(MOTOR_A_IN1, OUTPUT);
@@ -144,7 +173,7 @@ void left() {
   }
   if (sensorValue1 > threshold && sensorValue2 > threshold && sensorValue3 > threshold && sensorValue4 > threshold && sensorValue5 > threshold) {
     // Stop the robot
-    turn(100, 255); //turn left slightly
+    turn(255, 100); //turn left slightly
   }
   else {
     // Calculate the position of the robot on the line
@@ -558,5 +587,43 @@ void A1_H2_V22 () {
   }
 }
 void loop() {
-  A1_H2_V22();
+
+  while (response == "A1_H1_V11") {
+    Serial.println("0");
+    A1_H1_V11();
+
+  }
+  while (response == "A1_H1_V12") {
+    Serial.println("1");
+    A1_H1_V12();
+  }
+  while (response == "A2_H1_V11") {
+    A2_H1_V11();
+    Serial.println("2");
+
+  }
+  while (response == "A2_H1_V12") {
+    A2_H1_V12();
+Serial.println("3");
+  }
+
+  while (response == "A2_H2_V21") {
+    A2_H2_V21();
+    Serial.println("4");
+
+  }
+  while (response == "A2_H2_V22") {
+    A2_H2_V22();
+    Serial.println("5");
+
+  }
+  while (response == "A1_H2_V21") {
+    A1_H2_V21();
+    Serial.println("6");
+
+  }
+  while (response == "A1_H2_V22") {
+    A1_H2_V22();
+Serial.println("7");
+  }
 }
